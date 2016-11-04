@@ -9,6 +9,6 @@ The last time it was basic HTML/CSS, now it was a bit more thorough, including:
 
 If you would like to use this you have a few options.
 
-1. **Easiest** Set your homepage to https://dubbie.github.io/startpage-v2/.
+1. Set your homepage to https://dubbie.github.io/startpage-v2/. - **Easiest**
 2. You can simply clone this repo's master branch.
 3. Download the latest from [releases](https://github.com/Dubbie/startpage-v2/releases).
