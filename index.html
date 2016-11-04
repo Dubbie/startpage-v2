@@ -136,6 +136,10 @@
         margin-bottom: 1em;
       }
 
+      .modal .input-group input[type="text"].error {
+        background: rgb(255, 200, 200);
+      }
+
       .modal .input-group.split {
         display: flex;
       }
@@ -159,19 +163,21 @@
       .btn {
         padding: .5em 1em;
         font-family: 'Merriweather', serif;
-        /*font-family: 'Open Sans', sans-serif;*/
         font-weight: 700;
         color: #000;
         background: #fff;
         border-radius: 3px;
         border: 2px solid transparent;
-        /*transition: all 200ms ease-in-out;*/
+        transition: all 200ms ease-in-out;
       }
 
-      .btn-inverse,
       .btn:hover,
       .btn:focus {
         cursor: pointer;
+        text-decoration: underline;
+      }
+
+      .btn-inverse {
         background: transparent;
         border: 2px solid #fff;
         color: #fff;
@@ -183,6 +189,8 @@
         background: #fff;
         border: 2px solid transparent;
         color: #000;
+        text-decoration: none;
+        transition: none;
       }
 
       .btn-lg {
@@ -279,6 +287,7 @@
         position: relative;
         background: #232323;
         padding: 1em;
+        border: 2px solid transparent;
       }
 
       #left h1 {
@@ -317,7 +326,7 @@
         padding: 1em;
         background: #fff;
         color: #666;
-        border: 0;
+        border: 2px solid transparent;
         border-radius: 3px;
       }
 
@@ -325,6 +334,7 @@
       form input:focus {
         outline: 0;
         color: #000;
+        border-color: #232323;
       }
 
       /*  Lists  */
@@ -341,6 +351,7 @@
         margin: 1em 0 0 0;
         background: #232323;
         border-radius: 3px;
+        border: 2px solid transparent;
       }
 
       .list-container .list-holder.hidden {
@@ -418,7 +429,7 @@
       footer {
         padding-top: 2em;
         font-size: .7em;
-        color: #666;
+        color: rgba(255, 255, 255, 0.5);
       }
 
       /*  Effects  */
@@ -431,7 +442,8 @@
       input[type="text"]:hover,
       input[type="text"]:focus,
       #left:hover {
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        /*box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);*/
+        border: 2px solid rgba(255, 255, 255, .5);
       }
 
       @media(max-width: 700px){
@@ -445,6 +457,7 @@
     <div class="wrapper">
       <form class="modal hidden" id="new-list">
         <div class="container">
+          <h2>List</h2>
           <div class="input-group">
             <label for="title">Give your list a title</label>
             <input type="text" id="title" name="title" value="">
@@ -472,11 +485,25 @@
           </div>
         </div>
       </form>
+      <form class="modal hidden" id="settings">
+        <div class="container">
+          <h2>Settings</h2>
+          <div class="input-group">
+            <label for="background">Background</label>
+            <input type="text" id="background" name="background" value="">
+          </div>
+          <div class="input-group">
+            <div class="btn-group full">
+              <button type="button" id="save-btn" class="btn btn-lg">Save</button><button type="button" name="button" class="cancel-btn btn btn-inverse btn-lg">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </form>
       <div class="container">
         <nav>
           <span id="clock">clock</span>
           <ul>
-            <li><button type="button" id="new-btn" class="btn-text">New</button></li>
+            <li><button type="button" id="new-btn" class="btn-text">New</button></li><li><button type="button" id="settings-btn" class="btn-text">Settings</button></li>
           </ul>
         </nav>
         <div class="row">
@@ -515,10 +542,10 @@
             title: 'title',
             className: null,
             pairs: {
-              'link1': '#!',
-              'link2': '#!',
-              'link3': '#!',
-              'link4': '#!'
+              'link1': 'https://google.com',
+              'link2': 'https://google.com',
+              'link3': 'https://google.com',
+              'link4': 'https://google.com'
             }
 
           }
@@ -687,6 +714,34 @@
       }());
 
       function init() {
+        function setBackground() {
+          var bg = null;
+          if (typeof(Storage) !== 'undefined') {
+            if (typeof(localStorage.bg) === 'undefined') {
+              localStorage.bg = 'https://static.pexels.com/photos/27152/pexels-photo-27152.jpg';
+            }
+            bg = localStorage.bg;
+          } else {
+            bg = 'https://static.pexels.com/photos/27152/pexels-photo-27152.jpg';
+          }
+          document.body.style.backgroundImage = 'url("' + bg + '")';
+        }
+
+        function checkBackground() {
+          var _ = document.getElementById('background');
+
+          if (!_.value.match(/(https:\/\/|http:\/\/)[a-zA-Z0-9.\-_\/]+(.jpg|.jpeg|.jpe|.png|.bmp)/g) && !_.classList.contains('error')) {
+            _.classList.add('error');
+          } else if (_.classList.contains('error')) {
+            _.classList.remove('error');
+          }
+
+          if (!_.classList.contains('error')) {
+            localStorage.bg = _.value;
+            setBackground();
+          }
+        }
+
         function initNote() {
           var noteContainer = document.getElementById('note');
 
@@ -797,16 +852,16 @@
 
           cancelBtns.forEach(function(btn) {
             btn.onclick = function() {
-              // Remove the Editing id, if it exists
               var e = document.getElementById('editing');
               if (e != null) {
                 e.removeAttribute('id');
               }
 
-              // Hide modal(s)
               document.querySelectorAll('.modal')
                 .forEach(function(modal) {
-                  modal.classList.add('hidden');
+                  if (!modal.classList.contains('hidden')) {
+                    modal.classList.add('hidden');
+                  }
                 });
             }
           });
@@ -816,6 +871,36 @@
             document.getElementById('create-btn').classList.remove('hidden');
             document.getElementById('edit-btn').classList.add('hidden');
             document.getElementById('new-list').classList.remove('hidden');
+          }
+
+          // Settings btn
+          document.getElementById('settings-btn').onclick = function() {
+            var url = null;
+
+            if (typeof(Storage) !== 'undefined') {
+              if (typeof(localStorage.bg) === 'undefined') {
+                var bg = window.getComputedStyle(document.body, null).getPropertyValue('background-image').replace('url("', '').replace('")', '');
+
+                localStorage.bg = bg;
+              }
+
+              url = localStorage.bg;
+            } else {
+              url = 'This feature is not supported in your browser, sorry!';
+            }
+
+            document.getElementById('background').value = url;
+
+            checkBackground();
+            document.getElementById('settings').classList.remove('hidden');
+          }
+
+          // Background URL checking
+          document.getElementById('background').addEventListener('blur', checkBackground);
+
+          // Save btn
+          document.getElementById('save-btn').onclick = function() {
+            document.getElementById('settings').classList.add('hidden');
           }
 
           // Edit list btn
@@ -891,6 +976,7 @@
           setTimeout(initClock, 1000);
         }
 
+        setBackground();
         initNote();
         initAnimations();
         initSlider();
@@ -901,31 +987,6 @@
       window.onload = function() {
         init();
       }
-
-      // Create the lists
-
-      // var lists = {
-      //   'social': new List({
-      //     title: 'Social',
-      //     className: 'hidden',
-      //     pairs: {
-      //       'facebook': 'https://www.facebook.com/',
-      //       'twitter': 'https://www.twitter.com/',
-      //       'youtube': 'https://www.youtube.com/feed/subscriptions',
-      //       'gmail': 'https://mail.google.com/'
-      //     }
-      //   }),
-      //   'reddit': new List({
-      //     title: 'Reddit',
-      //     className: 'hidden',
-      //     pairs: {
-      //       'front': 'https://www.reddit.com/',
-      //       'r/webdev': 'https://www.reddit.com/r/webdev/',
-      //       'r/wow': 'https://www.reddit.com/r/wow/',
-      //       'r/overwatch': 'https://www.reddit.com/r/overwatch/'
-      //     }
-      //   })
-      // };
 
       // Get lists from localStorage
       var lists = [];
