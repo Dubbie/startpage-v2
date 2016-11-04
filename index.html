@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta Charset="utf-8">
+    <title>Welcome home</title>
+
+    <!-- Fonterino -->
+    <link href='https://fonts.googleapis.com/css?family=Merriweather:700|Open+Sans' rel='stylesheet' type='text/css'>
+
+    <!-- Style -->
+    <style media="screen">
+      * {
+        box-sizing: border-box;
+      }
+
+      ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: orange;
+        border-radius: 3px;
+      }
+
+      /*  Rangerslider hack  */
+
+      input[type=range] {
+        -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+           -moz-appearance: none;
+                appearance: none;
+        width: 100%; /* Specific width is required for Firefox. */
+        background: transparent; /* Otherwise white in Chrome */
+        margin: 0;
+      }
+
+      input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none; /*  Hide it first, then you can style it.  */
+        height: 24px;
+        width: 24px;
+        border-radius: 50%;
+        background: #fff;
+        border: 5px solid black;
+        margin-top: -12px;
+        transition: transform 200ms ease-in-out;
+      }
+
+      input[type=range]::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+      }
+
+
+      input[type=range]:focus {
+        outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+      }
+
+      input[type=range]::-ms-track {
+        width: 100%;
+        cursor: pointer;
+
+        /* Hides the slider so custom styles can be added */
+        background: transparent;
+        border-color: transparent;
+        color: transparent;
+      }
+
+      input[type=range]::-webkit-slider-runnable-track {
+        height: 2px;
+        background: #fff;
+      }
+
+      /*  !Rangerslider hack  */
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Open Sans', sans-serif;
+        color: #fff;
+      }
+
+      body {
+        height: 100vh;
+        background: #141611;
+        background-image: url('https://static.pexels.com/photos/27152/pexels-photo-27152.jpg'); /*  Thanks to Pexels for not providing me with an API, credit where credit is due.   */
+        background-position: center center;
+        background-size: cover;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+
+      h1, h2, h3, h4, a, b {
+        font-family: 'Merriweather', serif;
+        font-weight: 700;
+      }
+
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        padding: 2em 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 999;
+        transition: opacity 200ms ease-in-out;
+      }
+
+      .modal.hidden,
+      .modal .btn.hidden {
+        display: none;
+      }
+
+      .modal #links {
+        margin-bottom: 2em;
+      }
+
+      .modal .input-group {
+        margin-bottom: 1em;
+      }
+
+      .modal .input-group:last-of-type {
+        margin-bottom: 0;
+      }
+
+      .modal .input-group label {
+        display: block;
+        font-family: 'Merriweather', serif;
+        font-size: .9em;
+        font-weight: 700;
+        margin-bottom: 1em;
+      }
+
+      .modal .input-group.split {
+        display: flex;
+      }
+
+      .modal .input-group.split .input {
+        width: 100%;
+        margin-right: 1em;
+      }
+
+      .modal .input-group.split .input:last-of-type {
+        margin-right: 0;
+      }
+
+      .container {
+        max-width: 900px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 5%;
+      }
+
+      .btn {
+        padding: .5em 1em;
+        font-family: 'Merriweather', serif;
+        /*font-family: 'Open Sans', sans-serif;*/
+        font-weight: 700;
+        color: #000;
+        background: #fff;
+        border-radius: 3px;
+        border: 2px solid transparent;
+        /*transition: all 200ms ease-in-out;*/
+      }
+
+      .btn-inverse,
+      .btn:hover,
+      .btn:focus {
+        cursor: pointer;
+        background: transparent;
+        border: 2px solid #fff;
+        color: #fff;
+      }
+
+      .btn-inverse:hover,
+      .btn-inverse:focus {
+        cursor: pointer;
+        background: #fff;
+        border: 2px solid transparent;
+        color: #000;
+      }
+
+      .btn-lg {
+        padding: 1em 2em;
+      }
+
+      .btn-xl {
+        font-size: 1.25em;
+        padding: 1em;
+      }
+
+      .btn-group .btn:first-child {
+        border-top-left-radius: 3px;
+        border-bottom-left-radius: 3px;
+      }
+
+      .btn-group .btn {
+        width: 50%;
+        display: inline-block;
+        border-radius: 0;
+      }
+
+      .btn-group .btn:last-child {
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+      }
+
+      .full {
+        display: block;
+        width: 100%;
+      }
+
+      nav {
+        padding: 1em 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      nav ul {
+        text-align: right;
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+      }
+
+      nav ul li {
+        display: inline-block;
+      }
+
+      nav ul li .btn-text,
+      nav #clock {
+        font-family: 'Open Sans', sans-serif;
+        font-size: .9em;
+        font-style: italic;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.25);
+        border: 0;
+      }
+
+      nav ul li .btn-text {
+        padding: .5em 1em;
+      }
+
+      nav ul li:last-of-type .btn-text {
+        padding-right: 0;
+      }
+
+      nav ul li .btn-text:hover,
+      nav ul li .btn-text:focus {
+        cursor: pointer;
+        outline: 0;
+        color: #fff;
+        text-decoration: underline;
+      }
+
+      nav #clock:hover {
+        color: #fff;
+      }
+
+      .row {
+        display: flex;
+      }
+
+      .row .column {
+        width: 100%;
+        border-radius: 3px;
+      }
+
+      /*  Left Side  */
+
+      #left {
+        margin-right: 1em;
+        position: relative;
+        background: #232323;
+        padding: 1em;
+      }
+
+      #left h1 {
+        margin: 0 0 1em 0;
+      }
+
+      #left .note-container {
+        position: relative;
+        height: calc(100% - 64px);
+      }
+
+      #left #note {
+        font-family: 'Open Sans', sans-serif;
+        font-style: italic;
+        border: 0;
+        background: transparent;
+        color: #999;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        resize: none;
+        padding: 0;
+      }
+
+      #left #note:hover,
+      #left #note:focus {
+        outline: 0;
+        color: #fff;
+      }
+
+      /*  Form  */
+
+      form input[type="text"] {
+        font-family: 'Open Sans', sans-serif;
+        width: 100%;
+        padding: 1em;
+        background: #fff;
+        color: #666;
+        border: 0;
+        border-radius: 3px;
+      }
+
+      form input:hover,
+      form input:focus {
+        outline: 0;
+        color: #000;
+      }
+
+      /*  Lists  */
+
+      .list-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .list-container .list-holder {
+        position: relative;
+        padding: 5em 1em 1em 1em;
+        margin: 1em 0 0 0;
+        background: #232323;
+        border-radius: 3px;
+      }
+
+      .list-container .list-holder.hidden {
+        opacity: 0;
+      }
+
+      .list-container .list-holder .list-edit-btn,
+      .list-container .list-holder .list-remove-btn {
+        position: absolute;
+        opacity: 0;
+        right: 0;
+        background: 0;
+        border: 0;
+        font-family: 'Open Sans';
+        font-style: italic;
+        padding: 1em;
+        color: rgba(255, 255, 255, 0.25);
+        transition: opacity 200ms ease-in-out;
+      }
+
+      .list-container .list-holder .list-edit-btn {
+        top: 0;
+      }
+
+      .list-container .list-holder .list-remove-btn {
+        bottom: 0;
+      }
+
+      .list-container .list-holder:hover .list-edit-btn,
+      .list-container .list-holder:hover .list-remove-btn {
+        opacity: 1;
+      }
+
+      .list-container .list-holder .list-edit-btn:hover,
+      .list-container .list-holder .list-edit-btn:focus,
+      .list-container .list-holder .list-remove-btn:hover,
+      .list-container .list-holder .list-remove-btn:focus {
+        cursor: pointer;
+        outline: 0;
+        color: #fff;
+        text-decoration: underline;
+      }
+
+      .list-container .list {
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+      }
+
+      .list-container .list:last-of-type {
+        margin-bottom: 0;
+      }
+
+      .list-container .list .list-heading {
+        font-family: 'Merriweather', serif;
+        text-transform: capitalize;
+        font-size: 1.5em;
+        margin-bottom: .5em;
+      }
+
+      .list-container .list .list-item a {
+        font-family: 'Open Sans', sans-serif;
+        font-style: italic;
+        font-weight: 400;
+        font-size: .9em;
+        color: #fff;
+        text-decoration: none;
+      }
+
+      .list-container .list .list-item a:hover,
+      .list-container .list .list-item a:focus {
+        text-decoration: underline;
+      }
+
+      footer {
+        padding-top: 2em;
+        font-size: .7em;
+        color: #666;
+      }
+
+      /*  Effects  */
+
+      .list-holder, input[type="text"], #left, #note {
+        transition: all 200ms ease-in-out;
+      }
+
+      .list-holder:hover,
+      input[type="text"]:hover,
+      input[type="text"]:focus,
+      #left:hover {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      }
+
+      @media(max-width: 700px){
+        h1 {
+          font-size: 1.25em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <form class="modal hidden" id="new-list">
+        <div class="container">
+          <div class="input-group">
+            <label for="title">Give your list a title</label>
+            <input type="text" id="title" name="title" value="">
+          </div>
+          <div class="input-group">
+            <label for="howMany">How many links would you like?</label>
+            <input type="range" id="howMany" name="howMany" min="1" max="8" value="1">
+          </div>
+          <div id="links">
+            <div class="input-group split">
+              <div class="input">
+                <label>Alias</label>
+                <input type="text" name="alias[]" value="">
+              </div>
+              <div class="input">
+                <label>URL</label>
+                <input type="text" name="url[]" value="">
+              </div>
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="btn-group full">
+              <button type="button" id="create-btn" class="btn btn-lg">Create</button><button type="button" id="edit-btn" class="btn btn-lg hidden">Edit</button><button type="button" name="button" class="cancel-btn btn btn-inverse btn-lg">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </form>
+      <div class="container">
+        <nav>
+          <span id="clock">clock</span>
+          <ul>
+            <li><button type="button" id="new-btn" class="btn-text">New</button></li><li><button type="button" id="settings-btn" class="btn-text">Settings</button></li>
+          </ul>
+        </nav>
+        <div class="row">
+          <div id="left" class="column">
+            <h1>Welcome home</h1>
+            <div class="note-container">
+              <textarea name="note" id="note" rows="8" cols="40"></textarea>
+            </div>
+          </div>
+          <div id="right" class="column">
+            <form action="https://google.com/search" method="get">
+              <input type="text" name="q" value="" placeholder="Search...">
+            </form>
+            <div class="list-container"></div>
+          </div>
+        </div>
+        <footer>
+          <p>2016 • <b>Mihó Dániel</b> ♥ you if you are reading this.</p>
+        </footer>
+      </div>
+    </div>
+    <script type="text/javascript">
+      // Create an immediately invoked functional expression
+      // to wrap our code (IIFE)
+
+      (function() {
+
+        this.List = function() {
+
+          // Create global element references
+          this.background = null;
+          this.editBtn = null;
+
+          // Define option defaults
+          var defaults = {
+            title: 'title',
+            className: null,
+            pairs: {
+              'link1': '#!',
+              'link2': '#!',
+              'link3': '#!',
+              'link4': '#!'
+            }
+
+          }
+
+          // Create options by extending defaults with the passed in arugments
+          if (arguments[0] && typeof arguments[0] === "object") {
+            this.options = extendDefaults(defaults, arguments[0]);
+          }
+
+        }
+
+        // Public methods
+
+        List.prototype.create = function() {
+          // Build out the list
+          buildOut.call(this);
+
+          // Initialize our event listeners
+          initEvents.call(this);
+        }
+
+        List.prototype.edit = function() {
+          var _ = this,
+              opt = this.options;
+              form = document.getElementById('new-list');
+
+          // Set ID to editing!
+          this.listHolder.id = 'editing';
+
+          // Set title
+          document.getElementById('title').value = opt.title;
+
+          // Set range slider, then force update
+          var c = 0;
+          var arr = Object.entries(opt.pairs);
+
+          document.getElementById('howMany').value = arr.length;
+          document.getElementById('howMany').onchange();
+
+          // Set alias, url pairs
+          [].slice.call(document.querySelectorAll('.input-group.split'))
+            .forEach(function(input) {
+              // Alias
+              var alias = input.children[0].children.length > 1 ? input.children[0].children[1] : input.children[0].children[0];
+
+              alias.value = arr[c][0];
+
+              // URL
+              var url = input.children[1].children.length > 1 ? input.children[1].children[1] : input.children[1].children[0];
+
+              url.value = arr[c][1];
+
+              c++;
+            });
+
+          // Show the form
+          document.getElementById('edit-btn').classList.remove('hidden');
+          document.getElementById('create-btn').classList.add('hidden');
+
+          form.classList.remove('hidden');
+        }
+
+        List.prototype.remove = function() {
+          remove.call(this);
+        }
+
+        // Private methods
+
+        function buildOut() {
+          var pairs;
+
+          // Create list holder element
+
+          this.listHolder = document.createElement('div');
+          this.listHolder.className = 'list-holder ' + this.options.className;
+
+          // Create list edit button
+
+          this.editBtn = document.createElement('button');
+          this.editBtn.className = 'list-edit-btn';
+          this.editBtn.innerHTML = 'Edit';
+          this.listHolder.appendChild(this.editBtn);
+
+          this.remBtn = document.createElement('button');
+          this.remBtn.className = 'list-remove-btn';
+          this.remBtn.innerHTML = 'Remove';
+          this.listHolder.appendChild(this.remBtn);
+
+          // Create list element
+
+          this.list = document.createElement('ul');
+          this.list.className = 'list ';
+
+          // Create title element
+
+          this.listTitle = document.createElement('li');
+          this.listTitle.className = 'list-heading';
+          this.listTitle.innerHTML = this.options.title;
+          this.list.appendChild(this.listTitle);
+
+          // Create pairs and append to list
+
+          pairs = this.options.pairs;
+
+          for (pair in pairs) {
+            this.anchor = document.createElement('a');
+            this.anchor.innerHTML = pair;
+            this.anchor.href = pairs[pair];
+
+            this.pair = document.createElement('li');
+            this.pair.className = 'list-item';
+
+            this.pair.appendChild(this.anchor);
+            this.list.appendChild(this.pair);
+          }
+
+          // Append to holder
+          this.listHolder.appendChild(this.list);
+
+          [].slice.call(document.querySelectorAll('.list-container'))[0].appendChild(this.listHolder);
+        }
+
+        function initEvents() {
+          if (this.editBtn) {
+            this.editBtn.addEventListener('click', this.edit.bind(this));
+          }
+
+          if (this.remBtn) {
+            this.remBtn.addEventListener('click', this.remove.bind(this));
+          }
+        }
+
+        function remove() {
+          // Remove the list
+          var p = document.querySelectorAll('.list-container')[0],
+              c = this.listHolder;
+
+          p.removeChild(c);
+
+          // Remove from localStorage
+          // TODO: Make it with regex so you don't like a total noob
+          var temp = localStorage.lists;
+
+          temp = temp.replace(JSON.stringify(this.options), '');
+          if (temp.indexOf(',]') > -1) {
+            temp = temp.replace(',]', ']');
+          } else if (temp.indexOf('[,') > -1) {
+            temp = temp.replace('[,', '[');
+          }
+
+          localStorage.lists = temp;
+        }
+
+        // Utility method to extend defautls with user options
+
+        function extendDefaults(source, properties) {
+          var property;
+          for (property in properties) {
+            if (properties.hasOwnProperty(property)) {
+              source[property] = properties[property];
+            }
+          }
+          return source;
+        }
+
+      }());
+
+      function init() {
+        function initNote() {
+          var noteContainer = document.getElementById('note');
+
+          if (typeof(Storage) !== "undefined") {
+            if (typeof(localStorage.note) === "undefined") {
+              localStorage.note = 'Type your notes here! (Automatically saves into your localStorage)';
+            }
+
+            noteContainer.value = localStorage.note;
+
+            noteContainer.oninput = function() {
+              localStorage.note = this.value;
+            }
+
+          } else {
+            noteContainer.value = 'Your browser does not support local storage :(';
+          }
+        };
+
+        function initAnimations() {
+          var lists = [].slice.call(document.querySelectorAll('.list-holder'));
+          var i = 0;
+
+          lists.forEach(function(list) {
+            setTimeout(function() { list.classList.remove('hidden'); }, 250 * i);
+            i++;
+          });
+        }
+
+        function initSlider() {
+          document.getElementById('howMany')
+          .onchange = function() {
+            function createNew() {
+              var inputGroup = document.createElement('div');
+              inputGroup.className = 'input-group split';
+
+              var inputAliasHolder = document.createElement('div');
+              inputAliasHolder.className = 'input';
+              var inputURLHolder = document.createElement('div');
+              inputURLHolder.className = 'input';
+
+              if (document.querySelectorAll('.modal .input-group.split').length == 0) {
+                var inputAliasLabel = document.createElement('label');
+                inputAliasLabel.innerHTML = 'Alias';
+                inputAliasHolder.appendChild(inputAliasLabel);
+                var inputURLLabel = document.createElement('label');
+                inputURLLabel.innerHTML = 'URL';
+                inputURLHolder.appendChild(inputURLLabel);
+              }
+
+              var inputAliasInput = document.createElement('input');
+              inputAliasInput.name = 'alias[]';
+              inputAliasInput.type = 'text';
+              inputAliasHolder.appendChild(inputAliasInput);
+              var inputURLInput = document.createElement('input');
+              inputURLInput.name = 'url[]';
+              inputURLInput.type = 'text';
+              inputURLHolder.appendChild(inputURLInput);
+
+              inputGroup.appendChild(inputAliasHolder);
+              inputGroup.appendChild(inputURLHolder);
+
+              return inputGroup;
+            }
+
+            var container = document.getElementById('links');
+
+            container.innerHTML = '';
+            for (var i = 0; i < this.value; i++) {
+              container.appendChild(createNew());
+            }
+          }
+        }
+
+        function initBinds() {
+          function createListObject() {
+            // Title
+            var title = document.getElementById('title').value;
+
+            // Gettho object filler
+            var aliases = [].slice.call(document.querySelectorAll('input[name="alias[]"]'));
+            var urls = [].slice.call(document.querySelectorAll('input[name="url[]"]'));
+            var pairs = {};
+
+            for (var i in aliases) {
+              if (aliases.hasOwnProperty(i)) {
+                var key = aliases[i].value;
+                var value = urls[i].value;
+
+                if (key.length > 0 && key.length > 0) {
+                  pairs[key] = value;
+                }
+              }
+            }
+
+            // Init and create
+            var obj = {
+              title: title,
+              className: 'hidden',
+              pairs: pairs
+            };
+
+            return obj;
+          }
+
+          // Cancel btn
+          var cancelBtns = [].slice.call(document.querySelectorAll('.cancel-btn'));
+
+          cancelBtns.forEach(function(btn) {
+            btn.onclick = function() {
+              // Remove the Editing id, if it exists
+              var e = document.getElementById('editing');
+              if (e != null) {
+                e.removeAttribute('id');
+              }
+
+              // Hide modal(s)
+              document.querySelectorAll('.modal')
+                .forEach(function(modal) {
+                  modal.classList.add('hidden');
+                });
+            }
+          });
+
+          // New list btn
+          document.getElementById('new-btn').onclick = function() {
+            document.getElementById('create-btn').classList.remove('hidden');
+            document.getElementById('edit-btn').classList.add('hidden');
+            document.getElementById('new-list').classList.remove('hidden');
+          }
+
+          // Edit list btn
+          document.getElementById('edit-btn').onclick = function(e) {
+            function objFromHTML(list) {
+              var title = list.querySelector('li.list-heading').innerHTML;
+              var pairs = {};
+
+              [].slice
+                .call(list.querySelectorAll('li.list-item a'))
+                .forEach(function(a) {
+                  pairs[a.innerHTML] = a.href.indexOf(location.href) > -1 ? a.href.replace(location.href, '') : a.href;
+                });
+
+              var obj = {title: title, className: 'hidden',pairs: pairs};
+              return obj;
+            }
+
+            var newList = new List(createListObject()),
+                oldList = document.getElementById('editing');
+
+            newList.create();
+
+            // Magic happens, somehow we have to replace it in the storage aswell...
+            var obj = objFromHTML(oldList);
+            var temp = localStorage.lists;
+            temp = temp.replace(JSON.stringify(obj), JSON.stringify(newList.options));
+            localStorage.lists = temp;
+
+            // Replace it
+            document.querySelectorAll('.list-container')[0].replaceChild(newList.listHolder, oldList);
+
+            // Fade it in
+            initAnimations();
+
+            // Hide modal
+            document.getElementById('new-list').classList.add('hidden');
+
+          }
+
+          // New list create btn
+          document.getElementById('create-btn').onclick = function() {
+            var newList = new List(createListObject());
+
+            // Add to localStorage so we can remember it,
+            // then create it.
+            var lists = JSON.parse(localStorage.lists);
+            lists.push(createListObject());
+            localStorage.lists = JSON.stringify(lists);
+
+            newList.create();
+
+            // Fade it in
+            initAnimations();
+
+            // Hide modal
+            document.getElementById('new-list').classList.add('hidden');
+          }
+        }
+
+        function initClock() {
+          var now = new Date(),
+              h = now.getHours() < 10 ? '0' + now.getHours() : now.getHours();
+              m = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes();
+              time = h + ':' + m,
+              container = document.getElementById('clock');
+              old = container.innerHTML;
+
+          if (old != time) {
+            container.innerHTML = time;
+          }
+
+          setTimeout(initClock, 1000);
+        }
+
+        initNote();
+        initAnimations();
+        initSlider();
+        initBinds();
+        initClock();
+      }
+
+      window.onload = function() {
+        init();
+      }
+
+      // Create the lists
+
+      // var lists = {
+      //   'social': new List({
+      //     title: 'Social',
+      //     className: 'hidden',
+      //     pairs: {
+      //       'facebook': 'https://www.facebook.com/',
+      //       'twitter': 'https://www.twitter.com/',
+      //       'youtube': 'https://www.youtube.com/feed/subscriptions',
+      //       'gmail': 'https://mail.google.com/'
+      //     }
+      //   }),
+      //   'reddit': new List({
+      //     title: 'Reddit',
+      //     className: 'hidden',
+      //     pairs: {
+      //       'front': 'https://www.reddit.com/',
+      //       'r/webdev': 'https://www.reddit.com/r/webdev/',
+      //       'r/wow': 'https://www.reddit.com/r/wow/',
+      //       'r/overwatch': 'https://www.reddit.com/r/overwatch/'
+      //     }
+      //   })
+      // };
+
+      // Get lists from localStorage
+      var lists = [];
+      if (typeof(Storage) !== "undefined") {
+        if (typeof(localStorage.lists) === "undefined") {
+          localStorage.lists = '[{"title":"Social","className":"hidden","pairs":{"facebook":"https://www.facebook.com/","twitter":"https://www.twitter.com/","youtube":"https://www.youtube.com/feed/subscriptions","gmail":"https://www.mail.google.com/"}}]';
+        }
+      }
+
+      lists = JSON.parse(localStorage.lists);
+
+      // Create them using the public method!
+      for (var i in lists) {
+        var temp = new List(lists[i]);
+        temp.create();
+      }
+    </script>
+
+  </body>
+</html>
