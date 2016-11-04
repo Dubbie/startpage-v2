@@ -8,5 +8,7 @@ The last time it was basic HTML/CSS, now it was a bit more thorough, including:
 - [ ] Easy to understand *Working on it... * 🙄
 
 If you would like to use this you have a few options.
-1. You can simply clone this repo's master branch
-2. Download the latest from [releases](https://github.com/Dubbie/startpage-v2/releases).
+
+1. **Easiest** Set your homepage to https://dubbie.github.io/startpage-v2/.
+2. You can simply clone this repo's master branch.
+3. Download the latest from [releases](https://github.com/Dubbie/startpage-v2/releases).
