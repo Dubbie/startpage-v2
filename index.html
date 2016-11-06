@@ -888,29 +888,28 @@
           gridCheckbox: document.getElementById('grid'),
           saveButton: document.getElementById('save-btn'),
           cancelButton: document.getElementById('settings').querySelector('.cancel-btn')
-        }
+        };
 
         function init() {
           bindUIActions();
 
-          this.setMode('initial');
+          setMode('initial');
         }
 
         function bindUIActions() {
-          var _ = SettingsModule;
-
+          var _ = this;
           s.settingsButton.onclick = function() {
-            _.show();
+            show();
           }
 
           s.saveButton.onclick = function() {
-            _.setBackground();
-            _.setMode();
-            _.hide();
+            setBackground();
+            setMode();
+            hide();
           }
 
           s.cancelButton.onclick = function() {
-            _.hide();
+            hide();
           }
 
           s.bgInput.onkeyup = function() {
