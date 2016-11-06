@@ -106,7 +106,7 @@
         width: 100%;
         height: 100vh;
         padding: 2em 0;
-        background: rgba(0, 0, 0, 0.9);
+        background: #111;
         z-index: 999;
         transition: opacity 200ms ease-in-out;
       }
@@ -121,7 +121,7 @@
       }
 
       .modal .input-group {
-        margin-bottom: 1em;
+        margin-bottom: 2em;
       }
 
       .modal .input-group:last-of-type {
@@ -151,6 +151,19 @@
 
       .modal .input-group.split .input:last-of-type {
         margin-right: 0;
+      }
+
+      .modal .input-group label input[type="checkbox"] {
+        margin: 0 1em 0 0;
+      }
+
+      .modal .input-group label .small {
+        margin-left: .5em;
+        color: rgba(255, 255, 255, .5);
+        font-family: 'Open Sans', sans-serif;
+        font-weight: 400;
+        font-style: italic;
+        font-size: .8em;
       }
 
       .container {
@@ -281,6 +294,9 @@
       }
 
       /*  Left Side  */
+      .row.grid #left {
+        display: none;
+      }
 
       #left {
         margin-right: 1em;
@@ -338,6 +354,20 @@
       }
 
       /*  Lists  */
+      .row.grid .list-container {
+        flex-wrap: wrap;
+        flex-direction: row;
+      }
+
+      .row.grid .list-holder {
+        width: 49%;
+        flex-grow: 1;
+      }
+
+      .row.grid .list-holder:nth-of-type(even) {
+        margin-left: 2%;
+      }
+
 
       .list-container {
         display: flex;
@@ -455,7 +485,7 @@
   </head>
   <body>
     <div class="wrapper">
-      <form class="modal hidden" id="new-list">
+      <form class="modal hidden" id="new-list" autocomplete="off">
         <div class="container">
           <h2>List</h2>
           <div class="input-group">
@@ -491,6 +521,9 @@
           <div class="input-group">
             <label for="background">Background</label>
             <input type="text" id="background" name="background" value="">
+          </div>
+          <div class="input-group">
+            <label><input type="checkbox" id="grid" name="grid">Grid<span class="small">Hide note, only show lists</span></label>
           </div>
           <div class="input-group">
             <div class="btn-group full">
@@ -728,17 +761,44 @@
         }
 
         function checkBackground() {
-          var _ = document.getElementById('background');
+          var bg = document.getElementById('background');
 
-          if (!_.value.match(/(https:\/\/|http:\/\/)[a-zA-Z0-9.\-_\/]+(.jpg|.jpeg|.jpe|.png|.bmp)/g) && !_.classList.contains('error')) {
-            _.classList.add('error');
-          } else if (_.classList.contains('error')) {
-            _.classList.remove('error');
+          if (!bg.value.match(/(https:\/\/|http:\/\/)[a-zA-Z0-9.\-_\/]+(.jpg|.jpeg|.jpe|.png|.bmp)/g) && !bg.classList.contains('error')) {
+            bg.classList.add('error');
+          } else if (bg.classList.contains('error')) {
+            bg.classList.remove('error');
           }
 
-          if (!_.classList.contains('error')) {
-            localStorage.bg = _.value;
+          if (!bg.classList.contains('error')) {
+            localStorage.bg = bg.value;
             setBackground();
+          }
+        }
+
+        function toggleGrid(mode) {
+          var checkbox = document.getElementById('grid'),
+              row = document.querySelector('.row');
+
+          // Not sure if this is the best way to do it, but that's what I figured
+          if (typeof(mode) == 'string' && mode == 'initial') {
+            if (typeof(localStorage.grid) === 'undefined') {
+              localStorage.grid = false;
+            }
+            checkbox.checked = localStorage.grid == 'true' ? true : false;
+          }
+
+          // For debugging purposes
+          console.log('Checkbox:     ' + checkbox.checked);
+          console.log('localStorage: ' + localStorage.grid);
+
+          localStorage.grid = checkbox.checked;
+
+          if (localStorage.grid == 'true') {
+            row.classList.add('grid');
+            console.log('Added grid class');
+          } else {
+            row.classList.remove('grid');
+            console.log('Removed grid class');
           }
         }
 
@@ -876,27 +936,23 @@
           // Settings btn
           document.getElementById('settings-btn').onclick = function() {
             var url = null;
-
             if (typeof(Storage) !== 'undefined') {
               if (typeof(localStorage.bg) === 'undefined') {
                 var bg = window.getComputedStyle(document.body, null).getPropertyValue('background-image').replace('url("', '').replace('")', '');
-
                 localStorage.bg = bg;
               }
-
               url = localStorage.bg;
             } else {
               url = 'This feature is not supported in your browser, sorry!';
             }
-
             document.getElementById('background').value = url;
-
             checkBackground();
             document.getElementById('settings').classList.remove('hidden');
           }
 
           // Background URL checking
           document.getElementById('background').addEventListener('blur', checkBackground);
+          document.getElementById('grid').addEventListener('change', toggleGrid);
 
           // Save btn
           document.getElementById('save-btn').onclick = function() {
@@ -977,6 +1033,7 @@
         }
 
         setBackground();
+        toggleGrid('initial');
         initNote();
         initAnimations();
         initSlider();
