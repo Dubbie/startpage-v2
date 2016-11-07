@@ -44,7 +44,7 @@
         width: 24px;
         border-radius: 50%;
         background: #fff;
-        border: 5px solid black;
+        border: 5px solid #111;
         margin-top: -12px;
         transition: transform 200ms ease-in-out;
       }
@@ -106,7 +106,7 @@
         width: 100%;
         height: 100vh;
         padding: 2em 0;
-        background: rgba(0, 0, 0, 0.9);
+        background: #111;
         z-index: 999;
         transition: opacity 200ms ease-in-out;
       }
@@ -121,7 +121,7 @@
       }
 
       .modal .input-group {
-        margin-bottom: 1em;
+        margin-bottom: 2em;
       }
 
       .modal .input-group:last-of-type {
@@ -151,6 +151,19 @@
 
       .modal .input-group.split .input:last-of-type {
         margin-right: 0;
+      }
+
+      .modal .input-group label input[type="checkbox"] {
+        margin: 0 1em 0 0;
+      }
+
+      .modal .input-group label .small {
+        margin-left: .5em;
+        color: rgba(255, 255, 255, .5);
+        font-family: 'Open Sans', sans-serif;
+        font-weight: 400;
+        font-style: italic;
+        font-size: .8em;
       }
 
       .container {
@@ -281,6 +294,9 @@
       }
 
       /*  Left Side  */
+      .row.grid #left {
+        display: none;
+      }
 
       #left {
         margin-right: 1em;
@@ -338,6 +354,20 @@
       }
 
       /*  Lists  */
+      .row.grid .list-container {
+        flex-wrap: wrap;
+        flex-direction: row;
+      }
+
+      .row.grid .list-holder {
+        width: 49%;
+        flex-grow: 1;
+      }
+
+      .row.grid .list-holder:nth-of-type(even) {
+        margin-left: 2%;
+      }
+
 
       .list-container {
         display: flex;
@@ -455,7 +485,7 @@
   </head>
   <body>
     <div class="wrapper">
-      <form class="modal hidden" id="new-list">
+      <form class="modal hidden" id="new-list" autocomplete="off">
         <div class="container">
           <h2>List</h2>
           <div class="input-group">
@@ -491,6 +521,9 @@
           <div class="input-group">
             <label for="background">Background</label>
             <input type="text" id="background" name="background" value="">
+          </div>
+          <div class="input-group">
+            <label><input type="checkbox" id="grid" name="grid">Grid<span class="small">Hide note, only show lists</span></label>
           </div>
           <div class="input-group">
             <div class="btn-group full">
@@ -699,7 +732,7 @@
           localStorage.lists = temp;
         }
 
-        // Utility method to extend defautls with user options
+        // Utility method to extend defaults with user options
 
         function extendDefaults(source, properties) {
           var property;
@@ -714,34 +747,6 @@
       }());
 
       function init() {
-        function setBackground() {
-          var bg = null;
-          if (typeof(Storage) !== 'undefined') {
-            if (typeof(localStorage.bg) === 'undefined') {
-              localStorage.bg = 'https://static.pexels.com/photos/27152/pexels-photo-27152.jpg';
-            }
-            bg = localStorage.bg;
-          } else {
-            bg = 'https://static.pexels.com/photos/27152/pexels-photo-27152.jpg';
-          }
-          document.body.style.backgroundImage = 'url("' + bg + '")';
-        }
-
-        function checkBackground() {
-          var _ = document.getElementById('background');
-
-          if (!_.value.match(/(https:\/\/|http:\/\/)[a-zA-Z0-9.\-_\/]+(.jpg|.jpeg|.jpe|.png|.bmp)/g) && !_.classList.contains('error')) {
-            _.classList.add('error');
-          } else if (_.classList.contains('error')) {
-            _.classList.remove('error');
-          }
-
-          if (!_.classList.contains('error')) {
-            localStorage.bg = _.value;
-            setBackground();
-          }
-        }
-
         function initNote() {
           var noteContainer = document.getElementById('note');
 
@@ -760,61 +765,6 @@
             noteContainer.value = 'Your browser does not support local storage :(';
           }
         };
-
-        function initAnimations() {
-          var lists = [].slice.call(document.querySelectorAll('.list-holder'));
-          var i = 0;
-
-          lists.forEach(function(list) {
-            setTimeout(function() { list.classList.remove('hidden'); }, 250 * i);
-            i++;
-          });
-        }
-
-        function initSlider() {
-          document.getElementById('howMany')
-          .onchange = function() {
-            function createNew() {
-              var inputGroup = document.createElement('div');
-              inputGroup.className = 'input-group split';
-
-              var inputAliasHolder = document.createElement('div');
-              inputAliasHolder.className = 'input';
-              var inputURLHolder = document.createElement('div');
-              inputURLHolder.className = 'input';
-
-              if (document.querySelectorAll('.modal .input-group.split').length == 0) {
-                var inputAliasLabel = document.createElement('label');
-                inputAliasLabel.innerHTML = 'Alias';
-                inputAliasHolder.appendChild(inputAliasLabel);
-                var inputURLLabel = document.createElement('label');
-                inputURLLabel.innerHTML = 'URL';
-                inputURLHolder.appendChild(inputURLLabel);
-              }
-
-              var inputAliasInput = document.createElement('input');
-              inputAliasInput.name = 'alias[]';
-              inputAliasInput.type = 'text';
-              inputAliasHolder.appendChild(inputAliasInput);
-              var inputURLInput = document.createElement('input');
-              inputURLInput.name = 'url[]';
-              inputURLInput.type = 'text';
-              inputURLHolder.appendChild(inputURLInput);
-
-              inputGroup.appendChild(inputAliasHolder);
-              inputGroup.appendChild(inputURLHolder);
-
-              return inputGroup;
-            }
-
-            var container = document.getElementById('links');
-
-            container.innerHTML = '';
-            for (var i = 0; i < this.value; i++) {
-              container.appendChild(createNew());
-            }
-          }
-        }
 
         function initBinds() {
           function createListObject() {
@@ -845,62 +795,6 @@
             };
 
             return obj;
-          }
-
-          // Cancel btn
-          var cancelBtns = [].slice.call(document.querySelectorAll('.cancel-btn'));
-
-          cancelBtns.forEach(function(btn) {
-            btn.onclick = function() {
-              var e = document.getElementById('editing');
-              if (e != null) {
-                e.removeAttribute('id');
-              }
-
-              document.querySelectorAll('.modal')
-                .forEach(function(modal) {
-                  if (!modal.classList.contains('hidden')) {
-                    modal.classList.add('hidden');
-                  }
-                });
-            }
-          });
-
-          // New list btn
-          document.getElementById('new-btn').onclick = function() {
-            document.getElementById('create-btn').classList.remove('hidden');
-            document.getElementById('edit-btn').classList.add('hidden');
-            document.getElementById('new-list').classList.remove('hidden');
-          }
-
-          // Settings btn
-          document.getElementById('settings-btn').onclick = function() {
-            var url = null;
-
-            if (typeof(Storage) !== 'undefined') {
-              if (typeof(localStorage.bg) === 'undefined') {
-                var bg = window.getComputedStyle(document.body, null).getPropertyValue('background-image').replace('url("', '').replace('")', '');
-
-                localStorage.bg = bg;
-              }
-
-              url = localStorage.bg;
-            } else {
-              url = 'This feature is not supported in your browser, sorry!';
-            }
-
-            document.getElementById('background').value = url;
-
-            checkBackground();
-            document.getElementById('settings').classList.remove('hidden');
-          }
-
-          // Background URL checking
-          document.getElementById('background').addEventListener('blur', checkBackground);
-
-          // Save btn
-          document.getElementById('save-btn').onclick = function() {
-            document.getElementById('settings').classList.add('hidden');
           }
 
           // Edit list btn
@@ -934,30 +828,11 @@
             document.querySelectorAll('.list-container')[0].replaceChild(newList.listHolder, oldList);
 
             // Fade it in
-            initAnimations();
+            // initAnimations();
 
             // Hide modal
             document.getElementById('new-list').classList.add('hidden');
 
-          }
-
-          // New list create btn
-          document.getElementById('create-btn').onclick = function() {
-            var newList = new List(createListObject());
-
-            // Add to localStorage so we can remember it,
-            // then create it.
-            var lists = JSON.parse(localStorage.lists);
-            lists.push(createListObject());
-            localStorage.lists = JSON.stringify(lists);
-
-            newList.create();
-
-            // Fade it in
-            initAnimations();
-
-            // Hide modal
-            document.getElementById('new-list').classList.add('hidden');
           }
         }
 
@@ -976,10 +851,7 @@
           setTimeout(initClock, 1000);
         }
 
-        setBackground();
         initNote();
-        initAnimations();
-        initSlider();
         initBinds();
         initClock();
       }
@@ -1003,7 +875,277 @@
         var temp = new List(lists[i]);
         temp.create();
       }
-    </script>
 
+      // Modules
+      //
+      // Trying to refactor code to implement some structure.
+      // Starting off with the newest, settings module.
+      var SettingsModule = (function () {
+        var s = {
+          form: document.getElementById('settings'),
+          settingsButton: document.getElementById('settings-btn'),
+          bgInput: document.getElementById('background'),
+          gridCheckbox: document.getElementById('grid'),
+          saveButton: document.getElementById('save-btn'),
+          cancelButton: document.getElementById('settings').querySelector('.cancel-btn')
+        }
+
+        function init() {
+          bindUIActions();
+
+          this.setMode('initial');
+        }
+
+        function bindUIActions() {
+          var _ = SettingsModule;
+
+          s.settingsButton.onclick = function() {
+            _.show();
+          }
+
+          s.saveButton.onclick = function() {
+            _.setBackground();
+            _.setMode();
+            _.hide();
+          }
+
+          s.cancelButton.onclick = function() {
+            _.hide();
+          }
+
+          s.bgInput.onkeyup = function() {
+            checkBackground();
+          }
+        }
+
+        function checkBackground() {
+          if (!s.bgInput.value.match(/(https:\/\/|http:\/\/)[a-zA-Z0-9.\-_\/]+(.jpg|.jpeg|.jpe|.png|.bmp)/g)) {
+            // If input is bad, add the error tag
+            if (!s.bgInput.classList.contains('error')) {
+              s.bgInput.classList.add('error');
+            }
+          } else {
+            if (s.bgInput.classList.contains('error')) {
+              s.bgInput.classList.remove('error');
+            }
+          }
+
+          return !s.bgInput.classList.contains('error');
+        }
+
+        function setBackground() {
+          var newURL = s.bgInput.value,
+              curURL = window.getComputedStyle(document.body, null).getPropertyValue('background-image').replace('url("', '').replace('")', '');
+
+          // Check if valid
+          if (checkBackground() === true) {
+
+            if (curURL != newURL) {
+              document.body.style.backgroundImage = 'url("' + newURL + '")';
+
+              localStorage.bg = newURL;
+            }
+          }
+        }
+
+        function setMode(mode) {
+          var row = document.querySelector('.row');
+
+          if (typeof(mode) === 'string' && mode == 'initial') {
+            if (typeof(localStorage.grid) === 'undefined') {
+              localStorage.grid = false;
+            }
+            s.gridCheckbox.checked = localStorage.grid == 'true' ? true : false;
+          }
+
+          localStorage.grid = s.gridCheckbox.checked;
+          if (localStorage.grid == 'true') {
+            row.classList.add('grid');
+          } else {
+            row.classList.remove('grid');
+          }
+        }
+
+        function show() {
+          s.form.classList.remove('hidden');
+        }
+
+        function hide() {
+          s.form.classList.add('hidden');
+        }
+
+        // Public api
+        return {
+          init: init,
+          setBackground: setBackground,
+          setMode: setMode,
+          show: show,
+          hide: hide
+        }
+      })();
+
+      var NewListModule = (function() {
+        var s = {
+          form: document.getElementById('new-list'),
+          newButton: document.getElementById('new-btn'),
+          createButton: document.getElementById('create-btn'),
+          cancelButton: document.getElementById('new-list').querySelector('.cancel-btn'),
+          titleInput: document.getElementById('title'),
+          slider: document.getElementById('howMany'),
+          pairs: null
+        }
+
+        function init() {
+          // Private methods
+          bindUIActions();
+
+          // Public methods
+          this.updatePairs();
+          this.animate();
+        }
+
+        function bindUIActions() {
+          var _ = NewListModule;
+
+          s.newButton.onclick = function() {
+            _.show();
+          }
+
+          s.cancelButton.onclick = function() {
+            _.hide();
+          }
+
+          s.createButton.onclick = function() {
+            _.create();
+          }
+
+          s.slider.oninput = function() {
+            modifyPairs();
+          }
+        }
+
+        function updatePairs() {
+          s.pairs = [];
+
+          var divs = [].slice.call(s.form.querySelectorAll('.input-group.split'));
+
+          divs.forEach(function(div) {
+            var arr = [div.querySelector('input[name="alias[]"]'), div.querySelector('input[name="url[]"]')];
+            s.pairs.push(arr);
+          });
+        }
+
+        function modifyPairs() {
+          function createNew() {
+            var inputGroup = document.createElement('div');
+            inputGroup.className = 'input-group split';
+
+            var inputAliasHolder = document.createElement('div');
+            inputAliasHolder.className = 'input';
+            var inputURLHolder = document.createElement('div');
+            inputURLHolder.className = 'input';
+
+            if (document.querySelectorAll('.modal .input-group.split').length == 0) {
+              var inputAliasLabel = document.createElement('label');
+              inputAliasLabel.innerHTML = 'Alias';
+              inputAliasHolder.appendChild(inputAliasLabel);
+              var inputURLLabel = document.createElement('label');
+              inputURLLabel.innerHTML = 'URL';
+              inputURLHolder.appendChild(inputURLLabel);
+            }
+
+            var inputAliasInput = document.createElement('input');
+            inputAliasInput.name = 'alias[]';
+            inputAliasInput.type = 'text';
+            inputAliasHolder.appendChild(inputAliasInput);
+            var inputURLInput = document.createElement('input');
+            inputURLInput.name = 'url[]';
+            inputURLInput.type = 'text';
+            inputURLHolder.appendChild(inputURLInput);
+
+            inputGroup.appendChild(inputAliasHolder);
+            inputGroup.appendChild(inputURLHolder);
+
+            return inputGroup;
+          }
+
+          var cur = s.slider.value;
+
+          if (s.pairs.length < cur) {
+            for (var i = 0; i < (cur - s.pairs.length); i++) {
+              document.getElementById('links').appendChild(createNew());
+            }
+          } else if (s.pairs.length > cur) {
+
+            for (var i = 0; i < (s.pairs.length - cur); i++) {
+              document.getElementById('links').removeChild(document.getElementById('links').children[(s.pairs.length - i) - 1]);
+            }
+          }
+
+          updatePairs();
+        }
+
+        function getPairs() {
+          var output = {};
+
+          s.pairs.forEach(function(pair) {
+            output[pair[0].value] = pair[1].value;
+          });
+
+          return output;
+        }
+
+        function createList() {
+          var obj = {
+            title: s.titleInput.value,
+            className: 'hidden',
+            pairs: this.getPairs()
+          };
+          var newList = new List(obj);
+
+          // Add to localStorage so we can remember it,
+          // then create it.
+          var lists = JSON.parse(localStorage.lists);
+          lists.push(createListObject());
+          localStorage.lists = JSON.stringify(lists);
+
+          this.hide();
+          newList.create();
+          this.animate();
+        }
+
+        function animate() {
+          var lists = [].slice.call(document.querySelectorAll('.list-holder'));
+          var i = 0;
+
+          lists.forEach(function(list) {
+            setTimeout(function() { list.classList.remove('hidden'); }, 250 * i);
+            i++;
+          });
+        }
+
+        function show() {
+          s.form.classList.remove('hidden');
+        }
+
+        function hide() {
+          s.form.classList.add('hidden');
+        }
+
+        // Reveal public api
+        return {
+          init: init,
+          updatePairs: updatePairs,
+          getPairs: getPairs,
+          create: createList,
+          animate: animate,
+          show: show,
+          hide: hide
+        }
+      })();
+
+      SettingsModule.init();
+      NewListModule.init();
+    </script>
   </body>
 </html>
