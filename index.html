@@ -827,33 +827,14 @@
             // Replace it
             document.querySelectorAll('.list-container')[0].replaceChild(newList.listHolder, oldList);
 
-            // Fade it in
-            // initAnimations();
-
             // Hide modal
             document.getElementById('new-list').classList.add('hidden');
 
           }
         }
 
-        function initClock() {
-          var now = new Date(),
-              h = now.getHours() < 10 ? '0' + now.getHours() : now.getHours();
-              m = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes();
-              time = h + ':' + m,
-              container = document.getElementById('clock');
-              old = container.innerHTML;
-
-          if (old != time) {
-            container.innerHTML = time;
-          }
-
-          setTimeout(initClock, 1000);
-        }
-
         initNote();
         initBinds();
-        initClock();
       }
 
       window.onload = function() {
@@ -878,8 +859,36 @@
 
       // Modules
       //
-      // Trying to refactor code to implement some structure.
-      // Starting off with the newest, settings module.
+      //   Trying to refactor code to implement some structure.
+      //   Starting off with the newest, settings module.
+
+      var ClockModule = (function() {
+        var s = {
+          holder: document.getElementById('clock')
+        };
+
+        function init() {
+          updateClock();
+        }
+
+        function updateClock() {
+          var now = new Date();
+          var h = now.getHours() < 10 ? '0' + now.getHours() : now.getHours();
+          var m = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes();
+          var time = h + ':' + m;
+
+          if (s.holder.innerHTML != time) {
+            s.holder.innerHTML = time;
+          }
+
+          setTimeout(updateClock, 1000);
+        }
+
+        return {
+          init: init
+        }
+      })();
+
       var SettingsModule = (function () {
         var s = {
           form: document.getElementById('settings'),
@@ -892,12 +901,10 @@
 
         function init() {
           bindUIActions();
-
           setMode('initial');
         }
 
         function bindUIActions() {
-          var _ = this;
           s.settingsButton.onclick = function() {
             show();
           }
@@ -1143,6 +1150,7 @@
         }
       })();
 
+      ClockModule.init();
       SettingsModule.init();
       NewListModule.init();
     </script>
