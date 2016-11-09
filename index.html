@@ -616,7 +616,7 @@
           var arr = Object.entries(opt.pairs);
 
           document.getElementById('howMany').value = arr.length;
-          document.getElementById('howMany').onchange();
+          document.getElementById('howMany').oninput();
 
           // Set alias, url pairs
           [].slice.call(document.querySelectorAll('.input-group.split'))
@@ -746,101 +746,6 @@
 
       }());
 
-      function init() {
-        function initNote() {
-          var noteContainer = document.getElementById('note');
-
-          if (typeof(Storage) !== "undefined") {
-            if (typeof(localStorage.note) === "undefined") {
-              localStorage.note = 'Type your notes here! (Automatically saves into your localStorage)';
-            }
-
-            noteContainer.value = localStorage.note;
-
-            noteContainer.oninput = function() {
-              localStorage.note = this.value;
-            }
-
-          } else {
-            noteContainer.value = 'Your browser does not support local storage :(';
-          }
-        };
-
-        function initBinds() {
-          function createListObject() {
-            // Title
-            var title = document.getElementById('title').value;
-
-            // Gettho object filler
-            var aliases = [].slice.call(document.querySelectorAll('input[name="alias[]"]'));
-            var urls = [].slice.call(document.querySelectorAll('input[name="url[]"]'));
-            var pairs = {};
-
-            for (var i in aliases) {
-              if (aliases.hasOwnProperty(i)) {
-                var key = aliases[i].value;
-                var value = urls[i].value;
-
-                if (key.length > 0 && key.length > 0) {
-                  pairs[key] = value;
-                }
-              }
-            }
-
-            // Init and create
-            var obj = {
-              title: title,
-              className: 'hidden',
-              pairs: pairs
-            };
-
-            return obj;
-          }
-
-          // Edit list btn
-          document.getElementById('edit-btn').onclick = function(e) {
-            function objFromHTML(list) {
-              var title = list.querySelector('li.list-heading').innerHTML;
-              var pairs = {};
-
-              [].slice
-                .call(list.querySelectorAll('li.list-item a'))
-                .forEach(function(a) {
-                  pairs[a.innerHTML] = a.href.indexOf(location.href) > -1 ? a.href.replace(location.href, '') : a.href;
-                });
-
-              var obj = {title: title, className: 'hidden',pairs: pairs};
-              return obj;
-            }
-
-            var newList = new List(createListObject()),
-                oldList = document.getElementById('editing');
-
-            newList.create();
-
-            // Magic happens, somehow we have to replace it in the storage aswell...
-            var obj = objFromHTML(oldList);
-            var temp = localStorage.lists;
-            temp = temp.replace(JSON.stringify(obj), JSON.stringify(newList.options));
-            localStorage.lists = temp;
-
-            // Replace it
-            document.querySelectorAll('.list-container')[0].replaceChild(newList.listHolder, oldList);
-
-            // Hide modal
-            document.getElementById('new-list').classList.add('hidden');
-
-          }
-        }
-
-        initNote();
-        initBinds();
-      }
-
-      window.onload = function() {
-        init();
-      }
-
       // Get lists from localStorage
       var lists = [];
       if (typeof(Storage) !== "undefined") {
@@ -858,9 +763,53 @@
       }
 
       // Modules
-      //
-      //   Trying to refactor code to implement some structure.
-      //   Starting off with the newest, settings module.
+
+      var NoteModule = (function() {
+        var s = {
+          holder: document.getElementById('note')
+        };
+
+        function init() {
+          bindUIActions();
+          setNote('initial');
+        }
+
+        function bindUIActions() {
+          s.holder.onkeyup = function() {
+            setNote();
+          }
+        }
+
+        function getNote() {
+          var note = 'Your browser does not support local storage :(';
+
+          // Check it
+          if (typeof(Storage) !== "undefined") {
+            if (typeof(localStorage.note) === "undefined") {
+              note = 'Type your notes here! (Automatically saves into your localStorage)';
+            } else {
+              note = localStorage.note;
+            }
+          }
+
+          return note;
+        }
+
+        function setNote(mode) {
+          // Check it
+          if (typeof(mode) !== 'undefined' && mode === 'initial') {
+            s.holder.value = getNote();
+          } else if (typeof(Storage) !== 'undefined') {
+            localStorage.note = s.holder.value;
+          }
+        }
+
+        return {
+          init: init,
+          getNote: getNote,
+          setNote: setNote
+        }
+      })();
 
       var ClockModule = (function() {
         var s = {
@@ -901,6 +850,7 @@
 
         function init() {
           bindUIActions();
+          setBackground();
           setMode('initial');
         }
 
@@ -940,12 +890,13 @@
         }
 
         function setBackground() {
-          var newURL = s.bgInput.value,
-              curURL = window.getComputedStyle(document.body, null).getPropertyValue('background-image').replace('url("', '').replace('")', '');
+          var curURL = window.getComputedStyle(document.body, null).getPropertyValue('background-image').replace('url("', '').replace('")', ''),
+              newURL = s.bgInput.value.length != 0 ? s.bgInput.value : curURL;
+
+          s.bgInput.value = curURL;
 
           // Check if valid
           if (checkBackground() === true) {
-
             if (curURL != newURL) {
               document.body.style.backgroundImage = 'url("' + newURL + '")';
 
@@ -995,6 +946,7 @@
           form: document.getElementById('new-list'),
           newButton: document.getElementById('new-btn'),
           createButton: document.getElementById('create-btn'),
+          editButton: document.getElementById('edit-btn'),
           cancelButton: document.getElementById('new-list').querySelector('.cancel-btn'),
           titleInput: document.getElementById('title'),
           slider: document.getElementById('howMany'),
@@ -1006,28 +958,108 @@
           bindUIActions();
 
           // Public methods
-          this.updatePairs();
-          this.animate();
+          updatePairs();
+          animate();
         }
 
         function bindUIActions() {
-          var _ = NewListModule;
-
           s.newButton.onclick = function() {
-            _.show();
+            toggleButton('new');
+            show();
           }
 
           s.cancelButton.onclick = function() {
-            _.hide();
+            hide();
           }
 
           s.createButton.onclick = function() {
-            _.create();
+            createList();
+          }
+
+          s.editButton.onclick = function() {
+            toggleButton('edit');
+            editList();
           }
 
           s.slider.oninput = function() {
             modifyPairs();
           }
+        }
+
+        function toggleButton(mode) {
+          if (mode == 'edit') {
+            s.editButton.classList.remove('hidden');
+            s.createButton.classList.add('hidden');
+          } else if (mode == 'new') {
+            s.editButton.classList.add('hidden');
+            s.createButton.classList.remove('hidden');
+          }
+        }
+
+        function editList() {
+          function objFromHTML(list) {
+            var title = list.querySelector('li.list-heading').innerHTML;
+            var pairs = {};
+
+            [].slice
+              .call(list.querySelectorAll('li.list-item a'))
+              .forEach(function(a) {
+                pairs[a.innerHTML] = a.href.indexOf(location.href) > -1 ? a.href.replace(location.href, '') : a.href;
+              });
+
+            var obj = {title: title, className: 'hidden',pairs: pairs};
+            return obj;
+          }
+
+          var newList = new List(createListObject()),
+              oldList = document.getElementById('editing');
+
+          newList.create();
+
+          console.log(newList);
+
+          // Magic happens, somehow we have to replace it in the storage aswell...
+          var obj = objFromHTML(oldList);
+          var temp = localStorage.lists;
+          temp = temp.replace(JSON.stringify(obj), JSON.stringify(newList.options));
+          localStorage.lists = temp;
+
+          // Replace it
+          document.querySelectorAll('.list-container')[0].replaceChild(newList.listHolder, oldList);
+
+          hide();
+          animate();
+          toggleButton();
+        }
+
+        function createListObject() {
+          // Title
+          var title = document.getElementById('title').value;
+
+          // Gettho object filler
+          var aliases = [].slice.call(document.querySelectorAll('input[name="alias[]"]'));
+          var urls = [].slice.call(document.querySelectorAll('input[name="url[]"]'));
+          var pairs = {};
+
+          for (var i in aliases) {
+            if (aliases.hasOwnProperty(i)) {
+              var key = aliases[i].value;
+              var value = urls[i].value;
+
+              if (key.length > 0 && key.length > 0) {
+                pairs[key] = value;
+              }
+            }
+          }
+
+          // Init and create
+          var obj = {
+            title: title,
+            className: 'hidden',
+            pairs: pairs
+          };
+
+          return obj;
         }
 
         function updatePairs() {
@@ -1042,7 +1074,7 @@
         }
 
         function modifyPairs() {
-          function createNew() {
+          function buildOut() {
             var inputGroup = document.createElement('div');
             inputGroup.className = 'input-group split';
 
@@ -1079,7 +1111,7 @@
 
           if (s.pairs.length < cur) {
             for (var i = 0; i < (cur - s.pairs.length); i++) {
-              document.getElementById('links').appendChild(createNew());
+              document.getElementById('links').appendChild(buildOut());
             }
           } else if (s.pairs.length > cur) {
 
@@ -1105,7 +1137,7 @@
           var obj = {
             title: s.titleInput.value,
             className: 'hidden',
-            pairs: this.getPairs()
+            pairs: getPairs()
           };
           var newList = new List(obj);
 
@@ -1115,9 +1147,9 @@
           lists.push(createListObject());
           localStorage.lists = JSON.stringify(lists);
 
-          this.hide();
+          hide();
           newList.create();
-          this.animate();
+          animate();
         }
 
         function animate() {
@@ -1150,6 +1182,8 @@
         }
       })();
 
+      // Start it up
+      NoteModule.init();
       ClockModule.init();
       SettingsModule.init();
       NewListModule.init();
