@@ -746,7 +746,7 @@
 
       }());
 
-      // Get lists from localStorage
+      // Get lists, then create them using the public method!
       var lists = [];
       if (typeof(Storage) !== "undefined") {
         if (typeof(localStorage.lists) === "undefined") {
@@ -755,15 +755,12 @@
       }
 
       lists = JSON.parse(localStorage.lists);
-
-      // Create them using the public method!
       for (var i in lists) {
         var temp = new List(lists[i]);
         temp.create();
       }
 
       // Modules
-
       var NoteModule = (function() {
         var s = {
           holder: document.getElementById('note')
@@ -810,7 +807,6 @@
           setNote: setNote
         }
       })();
-
       var ClockModule = (function() {
         var s = {
           holder: document.getElementById('clock')
@@ -837,7 +833,6 @@
           init: init
         }
       })();
-
       var SettingsModule = (function () {
         var s = {
           form: document.getElementById('settings'),
@@ -940,7 +935,6 @@
           hide: hide
         }
       })();
-
       var NewListModule = (function() {
         var s = {
           form: document.getElementById('new-list'),
@@ -1016,8 +1010,6 @@
 
           newList.create();
 
-          console.log(newList);
-
           // Magic happens, somehow we have to replace it in the storage aswell...
           var obj = objFromHTML(oldList);
           var temp = localStorage.lists;
@@ -1033,30 +1025,14 @@
         }
 
         function createListObject() {
-          // Title
-          var title = document.getElementById('title').value;
+          // Update pairs first, then...
+          updatePairs();
 
-          // Gettho object filler
-          var aliases = [].slice.call(document.querySelectorAll('input[name="alias[]"]'));
-          var urls = [].slice.call(document.querySelectorAll('input[name="url[]"]'));
-          var pairs = {};
-
-          for (var i in aliases) {
-            if (aliases.hasOwnProperty(i)) {
-              var key = aliases[i].value;
-              var value = urls[i].value;
-
-              if (key.length > 0 && key.length > 0) {
-                pairs[key] = value;
-              }
-            }
-          }
-
-          // Init and create
+          // ...init and create the object
           var obj = {
-            title: title,
+            title: s.title,
             className: 'hidden',
-            pairs: pairs
+            pairs: s.pairs
           };
 
           return obj;
